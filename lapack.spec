@@ -1,11 +1,13 @@
+# based on PLD Linux spec git://git.pld-linux.org/packages/.git
 Summary:	The LAPACK libraries for numerical linear algebra
 Name:		lapack
-Version:	3.4.1
+Version:	3.5.0
 Release:	1
 License:	freely distributable
 Group:		Libraries
 Source0:	http://www.netlib.org/lapack/%{name}-%{version}.tgz
-# Source0-md5:	44c3869c38c8335c2b9c2a8bb276eb55
+# Source0-md5:	b1d3e3e425b2e44a06760ff173104bdf
+# TODO: drop it and use cmake
 Patch0:		%{name}-automake_support.patch
 URL:		http://www.netlib.org/lapack/
 BuildRequires:	autoconf
@@ -13,6 +15,10 @@ BuildRequires:	automake
 BuildRequires:	gcc-fortran
 BuildRequires:	libtool
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+# missing __stack_chk_fail symbol when only Fortran sources used
+%undefine	_fortify_cflags
+%undefine	_ssp_cflags
 
 %description
 LAPACK (Linear Algebra PACKage) is a standard library for numerical
@@ -78,8 +84,7 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-# present both in blas and lapack
-rm -f man/manl/{lsame,xerbla}.l
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/*.la
 
 %clean
 rm -fr $RPM_BUILD_ROOT
@@ -99,8 +104,6 @@ rm -fr $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libblas.so
 %attr(755,root,root) %{_libdir}/liblapack.so
-%{_libdir}/libblas.la
-%{_libdir}/liblapack.la
 %{_pkgconfigdir}/blas.pc
 %{_pkgconfigdir}/lapack.pc
 
@@ -113,7 +116,6 @@ rm -fr $RPM_BUILD_ROOT
 %files -n lapacke-devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/liblapacke.so
-%{_libdir}/liblapacke.la
 %{_includedir}/lapacke*.h
 %{_pkgconfigdir}/lapacke.pc
 
